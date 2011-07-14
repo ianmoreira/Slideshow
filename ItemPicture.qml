@@ -1,22 +1,30 @@
 import QtQuick 1.0
 
 Item {
+    id: item_pic
     width: root.width
     height: root.height
+    state: "hidden"
 
     function formatSize(){
         if(pic.height > 510) {
-            var proportion = 510 / pic.height
-            pic.scale = proportion;
-        } else {
-            pic.scale = 1;
+            pic.height = 510;
         }
     }
+
+    /*Component.onCompleted: {
+        if(!isCurrentItem) {
+            item_pic.state = "hidden"
+        } else {
+            item_pic.state = ""
+        }
+    }*/
 
     Image {
         id: pic
         smooth:  true
         source: filePath
+        fillMode: Image.PreserveAspectFit
         anchors.centerIn: parent
 
         Image {
@@ -39,5 +47,33 @@ Item {
         }
     }
 
+    states:  [
+        State {
+            name: "hidden"
+            when: !isCurrentItem
+            PropertyChanges {
+                target: pic
+                opacity: 0
+            }
+        },
+        State {
+            name: ""
+            when: isCurrentItem
+            PropertyChanges {
+                target: pic
+                opacity: 1
+            }
+        }
+    ]
 
+    transitions: [
+        Transition {
+            NumberAnimation {
+                target:  pic
+                duration: 500
+                properties: "opacity"
+                easing.type: Easing.InOutQuart
+            }
+        }
+    ]
 }

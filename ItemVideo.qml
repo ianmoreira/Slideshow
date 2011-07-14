@@ -5,6 +5,7 @@ Item {
     id: item_video
     width: root.width
     height: root.height
+    state: "hidden"
 
     property string videoSource
 
@@ -14,6 +15,7 @@ Item {
         if(!isCurrentItem) {
             videoComp.stop();
             loading.playing = false;
+        } else {
         }
     }
 
@@ -49,13 +51,22 @@ Item {
         source: videoSource
         anchors.centerIn: parent
         volume:  0.5
+        fillMode: Video.PreserveAspectFit
+        height:  510
 
         Image {
             id: shadow_video
             source: "images/shadow.png"
             anchors.top:  parent.bottom
             anchors.topMargin: 30
-            width: parent.width
+            anchors.horizontalCenter: parent.horizontalCenter
+            width: {
+                if(parent.width > 910) {
+                    return 910
+                } else {
+                    return parent.width
+                }
+            }
         }
 
         onStatusChanged: {
@@ -67,7 +78,7 @@ Item {
                 timer.stop();
             } else if (videoComp.status == Video.Loaded){
                 loading.playing = false;
-                formatSize();
+
                 videoComp.play();
             } else if (videoComp.status == Video.EndOfMedia) {
                 controler++
@@ -76,8 +87,36 @@ Item {
         }
 
         onError: {
-            controler++
             timer.start();
         }
     }
+
+    states:  [
+        State {
+            name: "hidden"
+            when: !isCurrentItem
+            PropertyChanges {
+                target: item_video
+                opacity: 0
+            }
+        },
+        State {
+            name: ""
+            when: isCurrentItem
+            PropertyChanges {
+                target: item_video
+                opacity: 1
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            NumberAnimation {
+                duration: 500
+                properties: "opacity";
+                easing.type: Easing.InOutQuart
+            }
+        }
+    ]
 }

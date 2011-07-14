@@ -10,6 +10,17 @@ Rectangle {
 
     property int controler: 0
 
+    function scaleProportion(big1, small1, big2, small2, value)
+    {
+        var bigValueOne = big1
+        var smallValueOne = small1
+
+        var bigValueTwo = big2
+        var smallValueTwo = small2
+
+        return ((bigValueTwo - smallValueTwo) / (bigValueOne - smallValueOne)) * (value - smallValueOne) + smallValueTwo
+    }
+
     FolderListModel {
         id: folderModel
         folder: "data"
@@ -31,7 +42,8 @@ Rectangle {
             width: root.width
             height: root.height
 
-            property bool video: true
+            property int locationTracker: x - listView.contentX
+            property bool video
             property int actualItem: controler
 
             function findType(value) {
@@ -57,6 +69,14 @@ Rectangle {
                 }
             }
 
+            transform: Rotation {
+                id: itemRotation
+                origin.x: element.width/2
+                origin.y: element.height/2
+                axis { x: 0.5; y: 1; z: 0 }
+                angle: scaleProportion(root.width, -root.width, -100, 100, locationTracker)
+            }
+
             onActualItemChanged: {
                 findType(fileName)
             }
@@ -69,6 +89,7 @@ Rectangle {
 
     ListView {
         id: listView
+        spacing:  -root.width/3
         anchors.fill:  parent
         currentIndex:controler
         orientation: ListView.Horizontal
@@ -87,10 +108,8 @@ Rectangle {
         repeat: true
         onTriggered: {
             controler++
-            if(controler > listView.count) {
-                listView.highlightMoveSpeed = -1;
+            if(controler > listView.count-1) {
                 controler = 0;
-                listView.highlightMoveSpeed = 1500;
             }
         }
     }
