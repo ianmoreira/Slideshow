@@ -14,11 +14,13 @@ Rectangle {
         id: folderModel
         folder: "data"
         sortField: "Time"
-        nameFilters: ["*.jpg", "*.png", "*.jpeg", "*.gif", "*.mp4", "*.mov", "*.flv", "*.avi"]
+        nameFilters: ["*.jpg", "*.png", "*.jpeg", "*.gif", "*.url"]
     }
 
     Image {
         id: bg
+        anchors.fill: parent
+        fillMode: Image.Stretch
         source: "images/background.png"
     }
 
@@ -36,7 +38,7 @@ Rectangle {
                 var index = value.indexOf(".");
                 var type = value.slice(index+1, value.length);
 
-                if (type == "mp4" || type == "mov" || type == "flv" || type == "avi") {
+                if (type == "url") {
                     video = true;
                 } else {
                     video = false;
@@ -71,6 +73,7 @@ Rectangle {
         currentIndex:controler
         orientation: ListView.Horizontal
         snapMode: ListView.SnapOneItem
+        interactive: false
         highlightMoveSpeed: 1500
         highlightRangeMode: ListView.StrictlyEnforceRange
         model: folderModel
@@ -87,6 +90,7 @@ Rectangle {
             if(controler > listView.count) {
                 listView.highlightMoveSpeed = -1;
                 controler = 0;
+                listView.highlightMoveSpeed = 1500;
             }
         }
     }

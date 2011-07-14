@@ -2,15 +2,22 @@ import QtQuick 1.0
 import QtMultimediaKit 1.1
 
 Item {
+    id: item_video
     width: root.width
     height: root.height
 
-    Component.onCompleted: {
-        if(!isCurrentItem)
-            videoComp.stop();
-        else
-            videoComp.play();
+    property string videoSource
 
+    Component.onCompleted: {
+        parseUrl(filePath)
+
+        if(!isCurrentItem) {
+            videoComp.stop();
+            loading.playing = false;
+        }
+    }
+
+    function formatSize(){
         if(videoComp.height > 510) {
             var proportion = 510 / videoComp.height
             videoComp.scale = proportion;
@@ -19,11 +26,29 @@ Item {
         }
     }
 
+    function parseUrl(value)
+    {
+        var url_xhr = new XMLHttpRequest();
+        url_xhr.onreadystatechange = function() {
+            if (url_xhr.readyState == XMLHttpRequest.DONE) {
+                videoSource = url_xhr.responseText;
+            }
+        }
+
+        url_xhr.open("GET", value);
+        url_xhr.send();
+    }
+
+    Loading {
+        id: loading
+        anchors.centerIn: parent
+    }
+
     Video {
         id: videoComp
-        source: filePath
+        source: videoSource
         anchors.centerIn: parent
-        volume:  0.0
+        volume:  0.5
 
         Image {
             id: shadow_video
@@ -37,12 +62,22 @@ Item {
             if(videoComp.status == Video.NoMedia || videoComp.status == Video.InvalidMedia) {
                 timer.start();
                 controler++
-            } else if (videoComp.status == Video.Loading || videoComp.status == Video.Loaded) {
+            } else if (videoComp.status == Video.Loading) {
+                loading.playing = true;
                 timer.stop();
+            } else if (videoComp.status == Video.Loaded){
+                loading.playing = false;
+                formatSize();
+                videoComp.play();
             } else if (videoComp.status == Video.EndOfMedia) {
                 controler++
                 timer.start();
             }
+        }
+
+        onError: {
+            controler++
+            timer.start();
         }
     }
 }
