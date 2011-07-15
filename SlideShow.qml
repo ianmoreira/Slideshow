@@ -73,7 +73,7 @@ Rectangle {
                 id: itemRotation
                 origin.x: element.width/2
                 origin.y: element.height/2
-                axis { x: 0.5; y: 1; z: 0 }
+                axis { x: 1; y: 1; z: 0 }
                 angle: scaleProportion(root.width, -root.width, -100, 100, locationTracker)
             }
 
@@ -91,14 +91,22 @@ Rectangle {
         id: listView
         spacing:  -root.width/3
         anchors.fill:  parent
-        currentIndex:controler
+        currentIndex: controler
         orientation: ListView.Horizontal
-        snapMode: ListView.SnapOneItem
         interactive: false
         highlightMoveSpeed: 1500
         highlightRangeMode: ListView.StrictlyEnforceRange
         model: folderModel
         delegate: fileDelegate
+
+        transform: Rotation {
+            id: listRotation
+            origin.x: listView.width/2
+            origin.y: listView.height/2
+            axis { x: 0.5; y: 1; z: 0 }
+            angle: 0
+        }
+
     }
 
     Timer {
@@ -109,8 +117,23 @@ Rectangle {
         onTriggered: {
             controler++
             if(controler > listView.count-1) {
-                controler = 0;
+                hideList.start();
             }
+        }
+    }
+
+    SequentialAnimation {
+        id: hideList
+        ParallelAnimation {
+            NumberAnimation { target: listRotation; property: "angle"; to: -25; duration: 400; easing.type: Easing.InOutQuart }
+            NumberAnimation { target: listView; property: "opacity"; to: 0; duration: 400; easing.type: Easing.InOutQuart }
+        }
+        ScriptAction {
+            script: controler = 0
+        }
+        ParallelAnimation {
+            NumberAnimation { target: listRotation; property: "angle"; from: 25; to: 0; duration: 400; easing.type: Easing.InOutQuart }
+            NumberAnimation { target: listView; property: "opacity"; to: 1; duration: 400; easing.type: Easing.InOutQuart }
         }
     }
 }

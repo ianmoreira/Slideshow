@@ -113,6 +113,7 @@ Item {
     transitions: [
         Transition {
             NumberAnimation {
+                target: videoComp
                 duration: 500
                 properties: "opacity";
                 easing.type: Easing.InOutQuart
